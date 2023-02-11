@@ -132,6 +132,7 @@ class Package(object):
 
     # Used to parse name from archive filename
     name_regex = re.compile(r"(?P<name>[\w -]+)-[arm|mac|nix|win]")
+    sanitize_version_regex = re.compile(r"([\w -]+)-([arm|mac|nix|win].+)-(.+)(\.tar\.gz|\.zip)")
 
     def __init__(self, filename):
         if sys.version_info[1] == 5:
@@ -152,6 +153,14 @@ class Package(object):
         self.supported_extensions = [".zip", ".gz", ".bz2"]
         self.ignored_files = [".DS_Store"]
         self.extract_info(filename)
+
+    @classmethod
+    def _sanitize_version(cls, package_basename: str) -> str:
+        result = cls.sanitize_version_regex.match(package_basename)
+        if not result:
+            raise VersionError("Cant extract version from package_basename")
+        name, arch, version, ext_archive = result.groups()
+        return version
 
     def extract_info(self, package):
         """Gets version number, platform & hash for package.
@@ -183,7 +192,8 @@ class Package(object):
 
         log.debug("Extracting update archive info for: %s", package_basename)
         try:
-            v = Version(package_basename)
+            package_version = self._sanitize_version(package_basename)
+            v = Version(package_version)
             self.channel = v.channel
             self.version = str(v)
         except VersionError:
