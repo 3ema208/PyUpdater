@@ -32,7 +32,7 @@ from urllib.parse import quote as url_quote
 
 import certifi
 import urllib3
-from pyupdater.utils.exceptions import FileDownloaderError
+from pyupdater.utils.exceptions import FileDownloaderError, ClientError
 
 log = logging.getLogger(__name__)
 
@@ -398,6 +398,7 @@ class FileDownloader(object):
             log.debug("Resource URL: %s", file_url)
         else:
             log.debug("Could not create resource URL.")
+            raise ClientError("Can not download file from urls {}".format(self.urls))
         return data
 
     def _write_to_file(self):
