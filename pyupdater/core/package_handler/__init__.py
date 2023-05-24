@@ -290,6 +290,9 @@ class PackageHandler(object):
 
     @staticmethod
     def _update_file_list(json_data, package_info):
+        if settings.UPDATES_KEY not in json_data:
+            json_data[settings.UPDATES_KEY] = {}
+
         files = json_data[settings.UPDATES_KEY]
         latest = json_data.get("latest")
         if latest is None:
